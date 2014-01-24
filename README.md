@@ -5,5 +5,5 @@ A Bluetooth LE GATT specification extension  for Android developed for the Europ
 
 This code is provided under the European Union Public License (EUPL)
 
-This code includes Asica fall detetection that is part of the Bluetooth SIG GATT standard
+This code includes Asica fall detetection that is not part of the Bluetooth SIG GATT standard
 
