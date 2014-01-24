@@ -1,6 +1,8 @@
 //IAAl_vAssist_BLE_Service_Template_Callback.aidl file
 
 package org.aal.vassist.bluetooth.le.gatt.refimpl;
+
+
 import android.bluetooth.BluetoothDevice;
 
 /**
@@ -9,12 +11,12 @@ import android.bluetooth.BluetoothDevice;
  *         Licence : European Union Public License (EUPL)
  *
  */
-interface IAAL_vAssist_BLE_Service_Template_Callback {
+oneway interface IAAL_vAssist_BLE_Service_Template_Callback {
 
 	
-	BluetoothDevice connectedToDevice();
+	void onConnectedToDevice(in BluetoothDevice device);
 	
-	BluetoothDevice disconnectedFromDevice();
+	void onDisconnectedFromDevice(in BluetoothDevice device);
 
 
 }
