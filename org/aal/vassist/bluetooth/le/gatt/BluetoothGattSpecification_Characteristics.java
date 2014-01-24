@@ -8068,7 +8068,7 @@ public class BluetoothGattSpecification_Characteristics {
 
 		int[] baseTime = bundle.getIntArray(EXTRA_VALUE0);
 		int heartRatePerMn = bundle.getInt(EXTRA_VALUE1) * 2;
-		correctAsicaYearBigEndianness(baseTime, BluetoothGattCharacteristic.FORMAT_UINT16,CORRECT_ASICA_ENDIANNESS_BUG);
+		//correctAsicaYearBigEndianness(baseTime, BluetoothGattCharacteristic.FORMAT_UINT16,CORRECT_ASICA_ENDIANNESS_BUG);
 		Calendar date = dateValuesArrayAsCalendar(baseTime);
 
 		object.on_handle_asica_heart_rate(bundle, date, heartRatePerMn);
@@ -8085,17 +8085,25 @@ public class BluetoothGattSpecification_Characteristics {
 
 		int flags = characteristic.getIntValue(
 				BluetoothGattCharacteristic.FORMAT_UINT8, _offset);
-
+		int mask = 0;
 		int bitShift = 0;
 		Log.d(TAG, "shift " + bitShift + " " + ((1 << bitShift) >> bitShift));
-		int alert = (flags & (1 << bitShift)) >> bitShift++;
+		mask = 1;
+		int alert = (flags & (mask << bitShift)) >> bitShift++;
+		Log.d(TAG, "alert" + alert);
 		Log.d(TAG, "shift " + bitShift + " " + ((1 << bitShift) >> bitShift));
-		int fall = (flags & (1 << bitShift)) >> bitShift++;
+		mask = 1;
+		int fall = (flags & (mask << bitShift)) >> bitShift++;
+		Log.d(TAG, "fall" + fall);
 		Log.d(TAG, "shift " + bitShift + " " + ((1 << bitShift) >> bitShift));
-		int lowBattery = (flags & (1 << bitShift)) >> bitShift++;
+		mask = 1;
+		int lowBattery = (flags & (mask << bitShift)) >> bitShift++;
+		Log.d(TAG, "lowBattery" + lowBattery);
 		Log.d(TAG, "shift " + bitShift + " " + ((1 << bitShift) >> bitShift));
-		int holterRequest = (flags & (1 << bitShift)) >> bitShift;
-		Log.d(TAG, "shift " + bitShift + " " + ((1 << bitShift) >> bitShift));
+		mask = 3;
+		int holterRequest = (flags & (mask << bitShift)) >> bitShift;
+		Log.d(TAG, "holterRequest" + holterRequest);
+		Log.d(TAG, "shift " + bitShift + " " + ((3 << bitShift) >> bitShift));
 		bitShift += 2;
 		int futureUse = (flags & (1 << bitShift)) >> bitShift;
 		bitShift += 2;
@@ -8128,7 +8136,7 @@ public class BluetoothGattSpecification_Characteristics {
 		}
 
 		int[] baseTime = bundle.getIntArray(EXTRA_VALUE0);
-		correctAsicaYearBigEndianness(baseTime, BluetoothGattCharacteristic.FORMAT_UINT16,CORRECT_ASICA_ENDIANNESS_BUG);
+		//correctAsicaYearBigEndianness(baseTime, BluetoothGattCharacteristic.FORMAT_UINT16,CORRECT_ASICA_ENDIANNESS_BUG);
 		Calendar date = dateValuesArrayAsCalendar(baseTime);
 
 		boolean alertButton = bundle.getInt(EXTRA_VALUE1) == 1;
@@ -8195,7 +8203,7 @@ public class BluetoothGattSpecification_Characteristics {
 		int[] baseTime = bundle.getIntArray(EXTRA_VALUE0);
 		int year = baseTime[0];
 		// corrects Big endians on year
-		correctAsicaYearBigEndianness(baseTime, BluetoothGattCharacteristic.FORMAT_UINT16,CORRECT_ASICA_ENDIANNESS_BUG);
+		//correctAsicaYearBigEndianness(baseTime, BluetoothGattCharacteristic.FORMAT_UINT16,CORRECT_ASICA_ENDIANNESS_BUG);
 		Calendar date = dateValuesArrayAsCalendar(baseTime);
 		
 
@@ -8249,7 +8257,7 @@ public class BluetoothGattSpecification_Characteristics {
 		}
 
 		int[] baseTime = bundle.getIntArray(EXTRA_VALUE0);
-		correctAsicaYearBigEndianness(baseTime, BluetoothGattCharacteristic.FORMAT_UINT16,CORRECT_ASICA_ENDIANNESS_BUG);
+		//correctAsicaYearBigEndianness(baseTime, BluetoothGattCharacteristic.FORMAT_UINT16,CORRECT_ASICA_ENDIANNESS_BUG);
 		Calendar date = dateValuesArrayAsCalendar(baseTime);
 
 		int activity = bundle.getInt(EXTRA_VALUE1);
@@ -8265,7 +8273,7 @@ public class BluetoothGattSpecification_Characteristics {
 			int[] nextOffset){
 		int _offset = offset;
 		int[] date = bundle.getIntArray(EXTRA_VALUE0);
-		correctAsicaYearBigEndianness(date, BluetoothGattCharacteristic.FORMAT_UINT16,CORRECT_ASICA_ENDIANNESS_BUG);
+		//correctAsicaYearBigEndianness(date, BluetoothGattCharacteristic.FORMAT_UINT16,CORRECT_ASICA_ENDIANNESS_BUG);
 		_offset = setDateTime(characteristic, date, _offset);
 		nextOffset[0] = _offset;
 	}
