@@ -18,9 +18,9 @@ import android.os.Bundle;
  * you can always retrieve :
  * 		the characteristic uuid with 
  * 			String uuid = bundle.getString(BluetoothDevice.EXTRA_UUID);
- * 		the service of the characteristic by bundle.getString(BluetoothGattSpecification_Characteristic.EXTRA_SERVICE_UUID) where EXTRA_SERVICE_UUID = "org.aal.vassist.at.SERVICE.EXTRA_UUID");
+ * 		the service of the characteristic by bundle.getString(BluetoothGattSpecification_Characteristics.EXTRA_SERVICE_UUID) where EXTRA_SERVICE_UUID = "org.aal.vassist.at.SERVICE.EXTRA_UUID");
  * 		the characteristic value with
- * 			byte[] characteristicValue = bundle.getByteArray(BluetoothGattSpecification_Characteristic.EXTRA_VALUE);
+ * 			byte[] characteristicValue = bundle.getByteArray(BluetoothGattSpecification_Characteristics.EXTRA_VALUE);
  * 
  * note that all keys to bundle extras have the format : 
  * 			"org.aal.vassist.at.VALUEx"; were x goes from "" to 8
@@ -69,13 +69,13 @@ public interface IBluetoothGattCharacteristicHandler {
 	
 	
 	/**
-	 * the default callback if the characteristic uuid was not found by BluetoothGattSpecification_Characteristic
+	 * the default callback if the characteristic uuid was not found by BluetoothGattSpecification_Characteristics
 	 * 
 	 * you can use this method to write your proprietary code
 	 * access the characteristic uuid with 
-	 * 			String uuid = bundle.getString(BluetoothGattSpecification_Characteristic.EXTRA_UUID);
+	 * 			String uuid = bundle.getString(BluetoothGattSpecification_Characteristics.EXTRA_UUID);
 	 * 		and the characteristic value with
-	 * 			byte[] characteristicValue = bundle.getByteArray(BluetoothGattSpecification_Characteristic.EXTRA_VALUE);
+	 * 			byte[] characteristicValue = bundle.getByteArray(BluetoothGattSpecification_Characteristics.EXTRA_VALUE);
 	 * 
 	 * @param bundle
 	 */
@@ -146,9 +146,9 @@ public interface IBluetoothGattCharacteristicHandler {
 	 * The value of the characteristic shall be an unsigned 8 bit integer that
 	 * has a fixed point exponent of 0. The Alert Level characteristic defines
 	 * the level of alert, and is one of the following three values: 
-	 * Value 0, meaning ‚ÄúNo Alert‚Äù
-	 * Value 1, meaning ‚ÄúMild Alert‚Äù 
-	 * Value 2, meaning ‚ÄúHigh Alert‚Äù
+	 * Value 0, meaning ìNo Alertî
+	 * Value 1, meaning ìMild Alertî 
+	 * Value 2, meaning ìHigh Alertî
 	 * 3 - 255	 Reserved
 	 * 
 	 * @param bundle
@@ -487,7 +487,7 @@ public interface IBluetoothGattCharacteristicHandler {
 	 * not fully implemented : Parameter Value because optional and variable
 	 * Request Op Code Response Value Response Parameter
 	 * 
-	 * use bundle.getByteArray(BluetoothGattSpecification_Characteristic.
+	 * use bundle.getByteArray(BluetoothGattSpecification_Characteristics.
 	 * EXTRA_VALUE); to get the received byte array
 	 * 
 	 * @param bundle
@@ -960,10 +960,10 @@ public interface IBluetoothGattCharacteristicHandler {
 	 * This characteristic is a variable length structure containing a Flags field,
 	 * a Supported Configuration Features field, and based upon the contents of the Flags field,
 	 * may also contain the following fields: 
-	 * ‚Ä¢ Measurement Status Support 
-	 * ‚Ä¢ Device and Sensor Status Support 
-	 * ‚Ä¢ Spot-Check Operating Mode Support 
-	 * ‚Ä¢ Continuous Measurement Operating Mode Support
+	 * ï Measurement Status Support 
+	 * ï Device and Sensor Status Support 
+	 * ï Spot-Check Operating Mode Support 
+	 * ï Continuous Measurement Operating Mode Support
 	 * 
 	 * The maximum length of this structure if all flags are set is 8 octets.
 	 * 
@@ -1047,11 +1047,11 @@ public interface IBluetoothGattCharacteristicHandler {
 	 * Type: org.bluetooth.characteristic.ringer_control_point
 	 * Assigned Number: 0x2A40
 	 * The Ringer Control Point characteristic defines the Control Point of Ringer.
-	 * Value 1, meaning ‚ÄúSilent Mode"
-	 * Value 2, meaning ‚ÄúMute Once‚Äù
-	 * Value 3, meaning ‚ÄúCancel Silent Mode‚Äù
+	 * Value 1, meaning ìSilent Mode"
+	 * Value 2, meaning ìMute Onceî
+	 * Value 3, meaning ìCancel Silent Modeî
 	 * Example:
-	 * The value 0x01 shall be interpreted as ‚ÄúSilent Mode‚Äù
+	 * The value 0x01 shall be interpreted as ìSilent Modeî
 	 * 
 	 * 
 	 * @param bundle
@@ -1191,7 +1191,7 @@ public interface IBluetoothGattCharacteristicHandler {
 	 * This characteristic shows how many numbers of unread alerts exist in the specific category in the device.
 	 * 
 	 * Summary:
-	 * This characteristic consists of ‚ÄúCategory ID‚Äù and ‚Äúuint8‚Äù which shows the number of unread alerts/messages.
+	 * This characteristic consists of ìCategory IDî and ìuint8î which shows the number of unread alerts/messages.
 	 * 
 	 * Example:
 	 * The value 0x01, 0x04 are interpreted that the server has 4 unread messages in Email category.

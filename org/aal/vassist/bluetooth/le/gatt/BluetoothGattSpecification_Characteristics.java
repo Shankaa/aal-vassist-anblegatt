@@ -1557,8 +1557,8 @@ public class BluetoothGattSpecification_Characteristics {
 	 * Categories of alerts/messages. The value of the characteristic is a bit
 	 * mask implemented as an array of unsigned 8 bit integers. The Alert
 	 * Category ID Bit Mask characteristic defines one bit for each predefined
-	 * category ID. The value 0x03 is interpreted as â€œSimple Alert and Email
-	 * bits setâ€
+	 * category ID. The value 0x03 is interpreted as “Simple Alert and Email
+	 * bits set”
 	 * 
 	 * first byte bits : name="Simple Alert" index="0" key="0" "Not Supported"
 	 * key="1" "Supported" name="Email" index="1" key="0" "Not Supported"
@@ -1576,7 +1576,7 @@ public class BluetoothGattSpecification_Characteristics {
 	 * 
 	 * 
 	 * 
-	 * If second octet is not present it is interpreted as all 0â€™es
+	 * If second octet is not present it is interpreted as all 0’es
 	 * 
 	 * The fields in the above table are in the order of LSO to MSO. Where LSO =
 	 * Least Significant Octet and MSO = Most Significant Octet.
@@ -1655,9 +1655,9 @@ public class BluetoothGattSpecification_Characteristics {
 	 * has a fixed point exponent of 0. The Alert Level characteristic defines
 	 * the level of alert, and is one of the following three values:
 	 * 
-	 * Value 0, meaning â€œNo Alertâ€ Value 1, meaning â€œMild Alertâ€ Value 2,
-	 * meaning â€œHigh Alertâ€ example the value 0x01 is interpreted as â€œMild
-	 * Alertâ€ minimum 0 maximum 2 Reserved end="255" start="3"
+	 * Value 0, meaning “No Alert” Value 1, meaning “Mild Alert” Value 2,
+	 * meaning “High Alert” example the value 0x01 is interpreted as “Mild
+	 * Alert” minimum 0 maximum 2 Reserved end="255" start="3"
 	 * 
 	 * put extra values into bundle: EXTRA_VALUE0 alertLevel format int / uint8
 	 * 
@@ -1715,12 +1715,12 @@ public class BluetoothGattSpecification_Characteristics {
 	 * 
 	 * The 1st octet value of the characteristic is an unsigned 8 bit integer
 	 * that has a fixed point exponent of 0. The 1st octet value expresses the
-	 * command ID that defines the serverâ€™s actions. The 2nd octet value of the
-	 * characteristic is an â€œAlert Category IDâ€ format. This octet shows the
+	 * command ID that defines the server’s actions. The 2nd octet value of the
+	 * characteristic is an “Alert Category ID” format. This octet shows the
 	 * target category that the command ID applies for.
 	 * 
-	 * Example : The data 0x02 0x01 interprets â€œDisable New Incoming
-	 * Notification for Email Categoryâ€.
+	 * Example : The data 0x02 0x01 interprets “Disable New Incoming
+	 * Notification for Email Category”.
 	 * 
 	 * key=0 Enable New Incoming Alert Notification key=1 "Enable Unread
 	 * Category Status Notification key=2 "Disable New Incoming Alert
@@ -1830,13 +1830,13 @@ public class BluetoothGattSpecification_Characteristics {
 
 	/**
 	 * The Alert Status characteristic defines the Status of alert. Bit 0,
-	 * meaning â€œRinger Stateâ€ Bit 1, meaning â€œVibrator Stateâ€ Bit 2, meaning
+	 * meaning “Ringer State” Bit 1, meaning “Vibrator State” Bit 2, meaning
 	 * "Display Alert Status"
 	 * 
-	 * Examples Bit 0, 0 meaning â€œRinger Stateâ€ not active, 1 meaning â€œRinger
-	 * Stateâ€ active Bit 1, 0 meaning â€œVibrator Stateâ€ not active, 1 meaning
-	 * â€œVibrator Stateâ€ active Bit 2, 0 meaning â€œDisplay Alert Stateâ€ not
-	 * active, 1 meaning â€œDisplay Alert Stateâ€ active
+	 * Examples Bit 0, 0 meaning “Ringer State” not active, 1 meaning “Ringer
+	 * State” active Bit 1, 0 meaning “Vibrator State” not active, 1 meaning
+	 * “Vibrator State” active Bit 2, 0 meaning “Display Alert State” not
+	 * active, 1 meaning “Display Alert State” active
 	 * 
 	 * put extra values into bundle: EXTRA_VALUE0 Command ID format int / uint8
 	 * EXTRA_VALUE0 Alert Status format int / uint8
