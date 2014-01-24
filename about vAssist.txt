@@ -1,0 +1,13 @@
+vAssist
+http://vassist.cure.at/project_overview/
+Voice Controlled Assistive Care and Communication Services for the Home
+
+Project overview
+
+The goal of the vAssist project is to provide specific voice controlled Home Care and Communication Services for two target groups of older persons: Seniors suffering from chronic diseases and persons suffering from (fine) motor skills impairments. The main goal is the development of simplified and adapted interface variants for tele-medical and communication applications using multilingual natural speech and voice interaction (and supportive graphical user interfaces where necessary).
+
+vAssist aims to enhance the perceived quality of healthcare services and to enable a reduction in the costs related to their production and delivery by achieving channel independence in the delivery of vAssist services, so that existing hardware and interfaces in the home of the users can be used such as PC, TV, mobile phone or tablets. Further, the vAssist consortium considers user, technical AND economic constraints in a sound methodological setup throughout the whole project duration (from user requirements to field evaluation studies). From an interface point of view vAssist leverages approaches to connect to universal interfaces in the delivery of AAL services (e.g. UniversAAL, I2Home, etc.) and provides user-specific voice assisted interfaces in order to address a wider audience.
+
+However, vAssist’s aim is NOT to develop another platform for service and interface integration, but to develop specific modules in order to enhance existing services with voice and speech intelligence. Existing platforms like the ones above-mentioned are considered in the exploitation strategy and technical design of vAssist services.
+
+A User-Centered Market-Oriented Design process (UCMOD) involves end-users in all phases of the development process and considers market-oriented aspects from the initial phase of the project. This assures that the iteratively developed services and business model (service and hardware delivery) are adapted to the requirements and needs of the users and show a high market potential within the next 2-3 years. Overall, vAssist services can be ready for market in this time after completion of the project – as it bases on existing services and such that are currently already in use, with service enhancement by adding new interaction without the requirement of new service development from scratch.
