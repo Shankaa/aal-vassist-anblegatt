@@ -4,8 +4,10 @@
 package org.aal.vassist.bluetooth.le.gatt.refimpl;
 
 import java.util.Calendar;
+import java.util.List;
 
 import org.aal.vassist.at.AAL_vAssist_Asica_AT_AccessService;
+import org.aal.vassist.at.IAAL_vAssist_AT_Service_Logs;
 import org.aal.vassist.bluetooth.le.gatt.BluetoothGattSpecification_Characteristics;
 import org.aal.vassist.bluetooth.le.gatt.IBluetoothGattCharacteristicHandler;
 import org.aal.vassist.bluetooth.le.gatt.IEEE_11073_20601_REGULATORY_CERTIFICATION_DATA_LIST;
@@ -151,13 +153,23 @@ public class AAl_vAssist_BLE_Service_Template extends Service {
 
 		@Override
 		public void onServiceDisconnected(int profile) {
-			// TODO Auto-generated method stub
+			if(profile == BluetoothProfile.GATT){
+				// get the devices you are disconnected to
+				// broadcast the disconnection event here
+			}
+			//TODO do what you have to do when devices are disconnected
 
 		}
 
 		@Override
 		public void onServiceConnected(int profile, BluetoothProfile proxy) {
-			// TODO Auto-generated method stub
+			List<BluetoothDevice> devices = proxy.getConnectedDevices();
+			if(profile == BluetoothProfile.GATT){
+				for (BluetoothDevice device : devices ){
+					broadcastConnectedToBTLEDevice(device);
+				}
+			}
+			//TODO do what you have to do when devices are connected
 
 		}
 	};
@@ -387,6 +399,7 @@ public class AAl_vAssist_BLE_Service_Template extends Service {
 	 * mIAAL_vAssist_BLE_Service_Template_Callbacks is used to store IAAL_vAssist_BLE_Service_Template_Callback objects sent by clients that bind to this service.
 	 * IAAL_vAssist_BLE_Service_Template_Callback is defined in the corresponding aidl file
 	 * we have defined no method in this descriptor
+	 * we made it static so it can be used inside a static Handler
 	 */
 	public static final RemoteCallbackList<IAAL_vAssist_BLE_Service_Template_Callback> mIAAL_vAssist_BLE_Service_Template_Callbacks = new  RemoteCallbackList<IAAL_vAssist_BLE_Service_Template_Callback>();
 	
@@ -532,6 +545,62 @@ public class AAl_vAssist_BLE_Service_Template extends Service {
 		}
 
 	}
+	//===============================================================================
+	//
+	// implementation of broadcast to subscribing applications
+	// we made those method static in order to use them inside static handlers
+	//
+	//===============================================================================
+	
+	
+	/**
+	 * broadcast the connection event to subscribers
+	 * 
+	 * integrate this to your code to your ServiceListener code
+	 * 
+	 * @param device the BluetoothDevice that we are connected to
+	 */
+	private static void broadcastConnectedToBTLEDevice(BluetoothDevice device){
+		
+		int i = mIAAL_vAssist_BLE_Service_Template_Callbacks.beginBroadcast();
+		while (i > 0) {
+			i--;
+			try {
+				mIAAL_vAssist_BLE_Service_Template_Callbacks.getBroadcastItem(i).onConnectedToDevice(device);
+			} catch (RemoteException e) {
+				// The RemoteCallbackList will take care of removing
+				// the dead object for us.
+			}
+		}
+		mIAAL_vAssist_BLE_Service_Template_Callbacks.finishBroadcast();
+	}
+	
+	
+
+	
+	/**
+	 * broadcast the disconnection event to subscribers
+	 * 
+	 * @param device the BluetoothDevice that we are disconnected from
+	 */
+	private static void broadcastDisconnectedFromBTLEDevice(BluetoothDevice device){
+		
+		int i = mIAAL_vAssist_BLE_Service_Template_Callbacks.beginBroadcast();
+		while (i > 0) {
+			i--;
+			try {
+				mIAAL_vAssist_BLE_Service_Template_Callbacks.getBroadcastItem(i).onDisconnectedFromDevice(device);
+			} catch (RemoteException e) {
+				// The RemoteCallbackList will take care of removing
+				// the dead object for us.
+			}
+		}
+		mIAAL_vAssist_BLE_Service_Template_Callbacks.finishBroadcast();
+	}
+	
+	
+	
+	//================================================================================
 
 	/**
 	 * @author Shankaa, Hugues Sansen for AAL vAssist project
