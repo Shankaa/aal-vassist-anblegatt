@@ -8312,6 +8312,7 @@ public class BluetoothGattSpecification_Characteristics {
 		// year
 		date[0] = characteristic.getIntValue(
 				BluetoothGattCharacteristic.FORMAT_UINT16, _offset);
+		
 		_offset +=UINT16_SIZE;
 		// month
 		date[1] = characteristic.getIntValue(
