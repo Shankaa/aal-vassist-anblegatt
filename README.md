@@ -10,7 +10,8 @@ This code includes Asica fall detection that is not part of the Bluetooth SIG GA
 This device is currently being developed for the purpose of the vAssist project.
 
 
-We provide a mechanism to visualize all the remote BLE device on an Activity
+We provide a mechanism to visualize all the remote BLE device events on an Activity.
+Useful for ble device developers
 
 
 The API is provided in
