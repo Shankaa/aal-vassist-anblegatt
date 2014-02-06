@@ -9,6 +9,10 @@ https://joinup.ec.europa.eu/software/page/eupl
 This code includes Asica fall detection that is not part of the Bluetooth SIG GATT standard
 This device is currently being developed for the purpose of the vAssist project.
 
+
+We provide a mechanism to visualize all the remote BLE device on an Activity
+
+
 The API is provided in
 aal-vassist-anblegatt/org/aal/vassist/bluetooth/le/gatt
 CAUTION :
