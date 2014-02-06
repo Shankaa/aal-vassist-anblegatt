@@ -14,10 +14,18 @@ import org.aal.vassist.bluetooth.le.gatt.refimpl.IAAL_vAssist_BLE_Service_Templa
 interface IAAL_vAssist_BLE_Service_Template {
 	
 	/**
-	 * register the callback on the IAAL_vAssist_BLE_Service_Template
-	 *
-	 */
+     * register a callback interface with the service to allow the service to call back to its clients.
+     * You must implement a subclass of IAAL_vAssist_AT_Service_Callback in your code
+     * eg : IAAL_vAssist_BLE_Service_Template_Callback.Stub mAAL_vAssist_BLE_Service_Template_Callback = new IAAL_vAssist_BLE_Service_Template_Callback.Stub() {....
+     */
 	void registerCallback(IAAL_vAssist_BLE_Service_Template_Callback callback);
+	
+	/**
+     * Remove a previously registered callback interface.
+     * Callbacks should unregister before destroying the application.
+     * 
+     */
+    void unregisterCallback(IAAL_vAssist_BLE_Service_Template_Callback callback);
 	
 	/**
 	 * return an array of all Bluetooth LE connected devices
@@ -25,5 +33,5 @@ interface IAAL_vAssist_BLE_Service_Template {
 	 */
 	BluetoothDevice[] getConnectedDevices();
 
-
+	//Etc....
 }
