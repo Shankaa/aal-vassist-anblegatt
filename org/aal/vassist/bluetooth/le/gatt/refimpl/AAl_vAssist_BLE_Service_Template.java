@@ -6,8 +6,6 @@ package org.aal.vassist.bluetooth.le.gatt.refimpl;
 import java.util.Calendar;
 import java.util.List;
 
-import org.aal.vassist.at.AAL_vAssist_Asica_AT_AccessService;
-import org.aal.vassist.at.IAAL_vAssist_AT_Service_Logs;
 import org.aal.vassist.bluetooth.le.gatt.BluetoothGattSpecification_Characteristics;
 import org.aal.vassist.bluetooth.le.gatt.IBluetoothGattCharacteristicHandler;
 import org.aal.vassist.bluetooth.le.gatt.IEEE_11073_20601_REGULATORY_CERTIFICATION_DATA_LIST;
@@ -56,19 +54,30 @@ public class AAl_vAssist_BLE_Service_Template extends Service {
 	private static final String TAG = "AAl_vAssist_BLE_Service_Template";
 
 	// message ids for handlers
-	private static final int MSG_DEVICE_DISCONNECTED = BluetoothProfile.STATE_DISCONNECTED;
-	private static final int MSG_DEVICE_CONNECTING = BluetoothProfile.STATE_CONNECTING;
-	private static final int MSG_DEVICE_CONNECTED = BluetoothProfile.STATE_CONNECTED;
-	private static final int MSG_DEVICE_DISCONNECTING = BluetoothProfile.STATE_DISCONNECTING;
-	private static final int MSG_CONNECTION_STATE_CHANGED = 4;
-	private static final int MSG_SERVICES_DISCOVERED = 54;
-	private static final int MSG_SCAN_RESULT = 6;
-	private static final int MSG_CHARACTERISTIC_CHANGED = 7;
-	private static final int MSG_CHARACTERISTIC_READ = 8;
-	private static final int MSG_CHARACTERISTIC_WRITE = 9;
-	private static final int MSG_DESCRIPTION_READ = 10;
-	private static final int MSG_DESCRIPTION_WRITE = 11;
-	private static final int MSG_REMOTE_RSSI_READ = 12;
+	// message ids for handlers
+	public static final int MSG_DEVICE_DISCONNECTED = BluetoothProfile.STATE_DISCONNECTED;
+	public static final int MSG_DEVICE_CONNECTING = BluetoothProfile.STATE_CONNECTING;
+	public static final int MSG_DEVICE_CONNECTED = BluetoothProfile.STATE_CONNECTED;
+	public static final int MSG_DEVICE_DISCONNECTING = BluetoothProfile.STATE_DISCONNECTING;
+	public static final int MSG_CONNECTION_STATE_CHANGED = 4;
+	public static final int MSG_SERVICES_DISCOVERED = 54;
+	public static final int MSG_SCAN_RESULT = 6;
+	public static final int MSG_CHARACTERISTIC_CHANGED = 7;
+	public static final int MSG_CHARACTERISTIC_READ = 8;
+	public static final int MSG_CHARACTERISTIC_READ_FAILED = 9;
+	public static final int MSG_CHARACTERISTIC_WRITE = 10;
+	public static final int MSG_CHARACTERISTIC_WRITE_FAILED = 11;
+	public static final int MSG_DESCRIPTION_READ = 12;
+	public static final int MSG_DESCRIPTION_READ_FAILED = 13;
+	public static final int MSG_DESCRIPTION_WRITE = 14;
+	public static final int MSG_DESCRIPTION_WRITE_FAILED = 15;
+	public static final int MSG_REMOTE_RSSI_READ = 16;
+	public static final int MSG_SCANNING = 17;
+	public static final int MSG_SCANNING_FAILED = 18;
+	public static final int MSG_STOP_SCANNING = 19;
+	public static final int MSG_NO_DEVICE_FOUND = 20;
+
+	public static final int MSG_GATT_DEVICE_FOUND = 25;
 
 	private static final int SCAN_IDLE = 0;
 	private static final int SCANNING = 1;
@@ -90,7 +99,7 @@ public class AAl_vAssist_BLE_Service_Template extends Service {
 	/**
 	 * 
 	 * this is a handler that is used to decouple actions from this thread.
-	 * You know why to use it in an Activity... and it is not a bad
+	 * You know why to use it in an PatientActivity... and it is not a bad
 	 * practice to use it inside a Service
 	 * 
 	 * 
@@ -219,6 +228,8 @@ public class AAl_vAssist_BLE_Service_Template extends Service {
 
 			handleCharacteristicReadOrChange(characteristic,
 					BluetoothGatt.GATT_SUCCESS, MSG_CHARACTERISTIC_CHANGED);
+			broadcastBTEDeviceEvent(MSG_CHARACTERISTIC_CHANGED, characteristic.getUuid().toString(), characteristic.getValue());
+			
 		}
 
 		/**
@@ -241,11 +252,13 @@ public class AAl_vAssist_BLE_Service_Template extends Service {
 			if (status == BluetoothGatt.GATT_SUCCESS) {
 				handleCharacteristicReadOrChange(characteristic, status,
 						MSG_CHARACTERISTIC_READ);
+				broadcastBTEDeviceEvent(MSG_CHARACTERISTIC_READ, characteristic.getUuid().toString(), characteristic.getValue());
+			} else {
+				broadcastBTEDeviceEvent(MSG_CHARACTERISTIC_READ_FAILED, characteristic.getUuid().toString(), characteristic.getValue());
 			}
 
-			// TODO do something after e.g
-			// if you implement a queue to send your read or write commands
-			// allow the next command to be sent
+			
+			
 		}
 
 		/**
@@ -269,7 +282,11 @@ public class AAl_vAssist_BLE_Service_Template extends Service {
 		@Override
 		public void onCharacteristicWrite(BluetoothGatt gatt,
 				BluetoothGattCharacteristic characteristic, int status) {
-
+			if (status == BluetoothGatt.GATT_SUCCESS) {
+				broadcastBTEDeviceEvent(MSG_CHARACTERISTIC_WRITE, characteristic.getUuid().toString(), characteristic.getValue());
+			} else {
+				broadcastBTEDeviceEvent(MSG_CHARACTERISTIC_WRITE_FAILED, characteristic.getUuid().toString(), characteristic.getValue());
+			}
 		}
 
 		/**
@@ -288,7 +305,23 @@ public class AAl_vAssist_BLE_Service_Template extends Service {
 		@Override
 		public void onConnectionStateChange(BluetoothGatt gatt, int status,
 				int newState) {
-
+			switch(status){
+			case BluetoothGatt.STATE_CONNECTED:
+				broadcastBTEDeviceEvent(MSG_DEVICE_CONNECTED, gatt.getDevice().getAddress(), null);
+				break;
+			case BluetoothGatt.STATE_CONNECTING:
+				broadcastBTEDeviceEvent(MSG_DEVICE_CONNECTING, gatt.getDevice().getAddress(), null);
+				break;
+			case BluetoothGatt.STATE_DISCONNECTED:
+				broadcastBTEDeviceEvent(MSG_DEVICE_DISCONNECTED, gatt.getDevice().getAddress(), null);
+				break;
+			case BluetoothGatt.STATE_DISCONNECTING:
+				broadcastBTEDeviceEvent(MSG_DEVICE_DISCONNECTING, gatt.getDevice().getAddress(), null);
+				break;
+				
+			}
+			
+			
 		}
 
 		/**
@@ -307,6 +340,11 @@ public class AAl_vAssist_BLE_Service_Template extends Service {
 		@Override
 		public void onDescriptorRead(BluetoothGatt gatt,
 				BluetoothGattDescriptor descriptor, int status) {
+			if(status == BluetoothGatt.GATT_SUCCESS){
+				broadcastBTEDeviceEvent(MSG_DESCRIPTION_READ, descriptor.getCharacteristic().getUuid().toString(), descriptor.getCharacteristic().getValue());
+			} else {
+				broadcastBTEDeviceEvent(MSG_DESCRIPTION_READ_FAILED, descriptor.getCharacteristic().getUuid().toString(), descriptor.getCharacteristic().getValue());
+			}
 		}
 
 		/**
@@ -325,7 +363,11 @@ public class AAl_vAssist_BLE_Service_Template extends Service {
 		@Override
 		public void onDescriptorWrite(BluetoothGatt gatt,
 				BluetoothGattDescriptor descriptor, int status) {
-
+			if(status == BluetoothGatt.GATT_SUCCESS){
+				broadcastBTEDeviceEvent(MSG_DESCRIPTION_WRITE, descriptor.getCharacteristic().getUuid().toString(), descriptor.getCharacteristic().getValue());
+			} else {
+				broadcastBTEDeviceEvent(MSG_DESCRIPTION_WRITE_FAILED, descriptor.getCharacteristic().getUuid().toString(), descriptor.getCharacteristic().getValue());
+			}
 		}
 
 		/**
@@ -401,7 +443,11 @@ public class AAl_vAssist_BLE_Service_Template extends Service {
 	 * we have defined no method in this descriptor
 	 * we made it static so it can be used inside a static Handler
 	 */
-	public static final RemoteCallbackList<IAAL_vAssist_BLE_Service_Template_Callback> mIAAL_vAssist_BLE_Service_Template_Callbacks = new  RemoteCallbackList<IAAL_vAssist_BLE_Service_Template_Callback>();
+	public static final RemoteCallbackList<IAAL_vAssist_BLE_Service_Template_Callback> AAL_vAssist_BLE_Service_Template_Callbacks = new  RemoteCallbackList<IAAL_vAssist_BLE_Service_Template_Callback>();
+	
+	
+	public static final RemoteCallbackList<IAAL_vAssist_BLE_Service_Logs_Callback> AAL_vAssist_BLE_Service_Logs_Callbacks = new RemoteCallbackList<IAAL_vAssist_BLE_Service_Logs_Callback>();
+	
 	
 	/**
 	 * the standard binder we use with our remote clients.
@@ -414,7 +460,15 @@ public class AAl_vAssist_BLE_Service_Template extends Service {
 		public void registerCallback(
 				IAAL_vAssist_BLE_Service_Template_Callback callback)
 				throws RemoteException {
-			mIAAL_vAssist_BLE_Service_Template_Callbacks.register(callback);
+			AAL_vAssist_BLE_Service_Template_Callbacks.register(callback);
+			
+		}
+
+		@Override
+		public void unregisterCallback(
+				IAAL_vAssist_BLE_Service_Template_Callback callback)
+				throws RemoteException {
+			AAL_vAssist_BLE_Service_Template_Callbacks.unregister(callback);
 			
 		}
 
@@ -422,6 +476,24 @@ public class AAl_vAssist_BLE_Service_Template extends Service {
 		public BluetoothDevice[] getConnectedDevices() throws RemoteException {
 			// TODO Auto-generated method stub
 			return null;
+		}
+	};
+	
+	
+	private IAAL_vAssist_BLE_Service_Logs.Stub mIAAL_vAssist_AT_Service_Logs = new IAAL_vAssist_BLE_Service_Logs.Stub() {
+		
+		@Override
+		public void unregisterLogsCallback(IAAL_vAssist_BLE_Service_Logs_Callback cb)
+				throws RemoteException {
+			AAL_vAssist_BLE_Service_Logs_Callbacks.unregister(cb);
+			
+		}
+		
+		@Override
+		public void registerLogsCallback(IAAL_vAssist_BLE_Service_Logs_Callback cb)
+				throws RemoteException {
+			AAL_vAssist_BLE_Service_Logs_Callbacks.register(cb);
+			
 		}
 	};
 
@@ -442,8 +514,11 @@ public class AAl_vAssist_BLE_Service_Template extends Service {
 		// do something with the intent
 		// you can return different binders according to the intent sent in the
 		// bindService(Intent service, ServiceConnection conn, int flags)
-		
-		return mIAAL_vAssist_BLE_Service_Template;
+		if("Logs".equals(arg0.getStringExtra("BinderType"))){
+			return mIAAL_vAssist_AT_Service_Logs;
+		} else {
+			return mIAAL_vAssist_BLE_Service_Template;
+		}
 	}
 
 	/*
@@ -562,17 +637,17 @@ public class AAl_vAssist_BLE_Service_Template extends Service {
 	 */
 	private static void broadcastConnectedToBTLEDevice(BluetoothDevice device){
 		
-		int i = mIAAL_vAssist_BLE_Service_Template_Callbacks.beginBroadcast();
+		int i = AAL_vAssist_BLE_Service_Template_Callbacks.beginBroadcast();
 		while (i > 0) {
 			i--;
 			try {
-				mIAAL_vAssist_BLE_Service_Template_Callbacks.getBroadcastItem(i).onConnectedToDevice(device);
+				AAL_vAssist_BLE_Service_Template_Callbacks.getBroadcastItem(i).onConnectedToDevice(device);
 			} catch (RemoteException e) {
 				// The RemoteCallbackList will take care of removing
 				// the dead object for us.
 			}
 		}
-		mIAAL_vAssist_BLE_Service_Template_Callbacks.finishBroadcast();
+		AAL_vAssist_BLE_Service_Template_Callbacks.finishBroadcast();
 	}
 	
 	
@@ -585,17 +660,39 @@ public class AAl_vAssist_BLE_Service_Template extends Service {
 	 */
 	private static void broadcastDisconnectedFromBTLEDevice(BluetoothDevice device){
 		
-		int i = mIAAL_vAssist_BLE_Service_Template_Callbacks.beginBroadcast();
+		int i = AAL_vAssist_BLE_Service_Template_Callbacks.beginBroadcast();
 		while (i > 0) {
 			i--;
 			try {
-				mIAAL_vAssist_BLE_Service_Template_Callbacks.getBroadcastItem(i).onDisconnectedFromDevice(device);
+				AAL_vAssist_BLE_Service_Template_Callbacks.getBroadcastItem(i).onDisconnectedFromDevice(device);
 			} catch (RemoteException e) {
 				// The RemoteCallbackList will take care of removing
 				// the dead object for us.
 			}
 		}
-		mIAAL_vAssist_BLE_Service_Template_Callbacks.finishBroadcast();
+		AAL_vAssist_BLE_Service_Template_Callbacks.finishBroadcast();
+	}
+	
+	//================================================================================
+	
+	/**
+	 * broadcast a read write bluetooth event as received for log display
+	 */
+	private static void broadcastBTEDeviceEvent(int operationType,String uuid,byte[] bytes){
+		long time = System.currentTimeMillis();
+		
+		
+		int i = AAL_vAssist_BLE_Service_Logs_Callbacks.beginBroadcast();
+		while (i > 0) {
+			i--;
+			try {
+				AAL_vAssist_BLE_Service_Logs_Callbacks.getBroadcastItem(i).onBTLELog(time, operationType, uuid, bytes);
+			} catch (RemoteException e) {
+				// The RemoteCallbackList will take care of removing
+				// the dead object for us.
+			}
+		}
+		AAL_vAssist_BLE_Service_Logs_Callbacks.finishBroadcast();
 	}
 	
 	
