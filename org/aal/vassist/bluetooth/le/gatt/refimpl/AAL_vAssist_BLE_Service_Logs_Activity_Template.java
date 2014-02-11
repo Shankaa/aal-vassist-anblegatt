@@ -5,6 +5,11 @@ package org.aal.vassist.bluetooth.le.gatt.refimpl;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import org.aal.vassist.at.R;
 
 
 import android.annotation.SuppressLint;
@@ -20,6 +25,8 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Menu;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 
 
 /**
@@ -54,6 +61,16 @@ public class AAL_vAssist_BLE_Service_Logs_Activity_Template extends Activity {
 	
 	private static ArrayList<HashMap<String, String>> logs = new ArrayList<HashMap<String, String>>();
 	
+
+	private ListView logView;
+	private SimpleAdapter logViewAdapter;
+	private static final Calendar ANCILIARY_CALENDAR = Calendar.getInstance();
+	
+
+	private LinkedBlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>();
+	private ThreadPoolExecutor mThreadPoolExecutor = new ThreadPoolExecutor(5,
+			5, 500, TimeUnit.MILLISECONDS, workQueue);
+	
 	//private IAAL_vAssist_AT_Service serviceBinder;
 	private IAAL_vAssist_BLE_Service_Logs serviceBinder;
 	
@@ -65,95 +82,17 @@ public class AAL_vAssist_BLE_Service_Logs_Activity_Template extends Activity {
 		@Override
 		public void handleMessage(Message msg) {
 			Bundle data = msg.getData();
-			long timestamp;
-			int opsType;
-			String uuid;
-			byte[] bytes;
-			int l = 0;
-			int v = 0;
-			String s;
-			String packet = "";
 			switch (msg.what) {
 			case Message_What_Logs:
-				//final ListView logView = (ListView) findViewById(R.id.logView);
-				timestamp = data.getLong(KEY_TIMESTAMP);
-				opsType = data.getInt(KEY_OPS);
-				uuid = data.getString(KEY_UUID);
-				bytes = data.getByteArray(KEY_DATA);
-				l = bytes.length;
 				HashMap<String, String> map = new HashMap<String, String>();
+				map.put(KEY_TIMESTAMP, data.getString(KEY_TIMESTAMP));
+				map.put(KEY_OPS, data.getString(KEY_OPS));
+				map.put(KEY_UUID, data.getString(KEY_UUID));
+				map.put(KEY_DATA, data.getString(KEY_DATA));
 				
-				map.put(KEY_TIMESTAMP, getPrintableHour(timestamp));
-				switch (opsType) {
-				case AAl_vAssist_BLE_Service_Template.MSG_DEVICE_DISCONNECTED:
-					map.put(KEY_OPS,"disconnected from device");
-					break;
-				case AAl_vAssist_BLE_Service_Template.MSG_DEVICE_CONNECTED:
-					map.put(KEY_OPS,"connected to device");
-					break;
-				case AAl_vAssist_BLE_Service_Template.MSG_CHARACTERISTIC_CHANGED:
-					map.put(KEY_OPS, "characteristic changed");
-					break;
-				case AAl_vAssist_BLE_Service_Template.MSG_CHARACTERISTIC_READ:
-					map.put(KEY_OPS, "characteristic read");
-					break;
-				case AAl_vAssist_BLE_Service_Template.MSG_CHARACTERISTIC_READ_FAILED:
-					map.put(KEY_OPS, "characteristic read failed");
-					break;
-				case AAl_vAssist_BLE_Service_Template.MSG_CHARACTERISTIC_WRITE:
-					map.put(KEY_OPS, "characteristic write");
-					break;
-				case AAl_vAssist_BLE_Service_Template.MSG_CHARACTERISTIC_WRITE_FAILED:
-					map.put(KEY_OPS, "characteristic write failed");
-					break;
-				case AAl_vAssist_BLE_Service_Template.MSG_DESCRIPTION_READ:
-					map.put(KEY_OPS, "description read");
-					break;
-				case AAl_vAssist_BLE_Service_Template.MSG_DESCRIPTION_READ_FAILED:
-					map.put(KEY_OPS, "description read failed");
-					break;
-				case AAl_vAssist_BLE_Service_Template.MSG_DESCRIPTION_WRITE:
-					map.put(KEY_OPS, "description write");
-					break;
-				case AAl_vAssist_BLE_Service_Template.MSG_DESCRIPTION_WRITE_FAILED:
-					map.put(KEY_OPS, "description write failed");
-					break;
-				case AAl_vAssist_BLE_Service_Template.MSG_SCANNING:
-					map.put(KEY_OPS,"scanning");
-					break;
-				case AAl_vAssist_BLE_Service_Template.MSG_SCANNING_FAILED:
-					map.put(KEY_OPS,"scanning failed");
-					break;
-				case AAl_vAssist_BLE_Service_Template.MSG_STOP_SCANNING:
-					map.put(KEY_OPS,"scanning over");
-					break;
-				case AAl_vAssist_BLE_Service_Template.MSG_NO_DEVICE_FOUND:
-					map.put(KEY_OPS,"no device found");
-					break;
-
-				default:
-					map.put(KEY_OPS, "operation unknown");
-					break;
-				}
-				
-				map.put(KEY_UUID, uuid);
-				
-				while(l-->0){
-					try{
-						v = 255 & bytes[l];
-						s =  Integer.toString(v, 16);
-						s = s.length() == 1?"0"+s:s;
-						packet = s + (packet.length()>0?" ":"")+ packet;
-					} catch (Exception e){
-						break;
-					}
-				}
-				map.put(KEY_DATA, packet);
 				logs.add(map);
-				/*
-				ListView logView = (ListView) findViewById(R.id.logView);
-				((SimpleAdapter)logView.getAdapter()).notifyDataSetChanged();
-				*/
+				logViewAdapter.notifyDataSetChanged();
+				logView.smoothScrollToPosition(logViewAdapter.getCount());
 				break;
 
 			default:
@@ -166,15 +105,16 @@ public class AAL_vAssist_BLE_Service_Logs_Activity_Template extends Activity {
 	private IAAL_vAssist_BLE_Service_Logs_Callback.Stub mIAAL_vAssist_BLE_Service_Logs_Callback = new IAAL_vAssist_BLE_Service_Logs_Callback.Stub() {
 		
 		@Override
-		public void onBTLELog(long time, int ops, String uuid, byte[] packet)
+		public void onBTLELog(final long time,final int ops,final String uuid,final byte[] packet)
 				throws RemoteException {
-			Message msg = mHandler.obtainMessage(Message_What_Logs);
-			Bundle data = msg.getData();
-			data.putLong(KEY_TIMESTAMP, time);
-			data.putInt(KEY_OPS, ops);
-			data.putString(KEY_UUID, uuid);
-			data.putByteArray(KEY_DATA, packet);
-			msg.sendToTarget();
+			Runnable runnable = new Runnable() {
+				public void run() {
+					synchronized (logViewAdapter){
+						updateLogView(time, ops, uuid, packet);
+					}
+				}
+			};
+			mThreadPoolExecutor.execute(runnable);
 		}
 	};
 	
@@ -204,21 +144,33 @@ public class AAL_vAssist_BLE_Service_Logs_Activity_Template extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		/*
+		
 		setContentView(R.layout.activity_vassist__service_);
-		ListView logView = (ListView) findViewById(R.id.logView); 
-		String[] from = {KEY_TIMESTAMP,KEY_UUID,KEY_OPS,KEY_DATA};
-		int[] to = new int[] { R.id.timestampView, R.id.uuidView,R.id.opsView, R.id.dataView};
-		SimpleAdapter adapter = new SimpleAdapter(this, logs, R.layout.log_event, from, to);
-		logView.setAdapter(adapter);
-		*/
+		Runnable runnable = new Runnable() {
+			@Override
+			public void run() {
+				
+					logView = (ListView) findViewById(R.id.logView);
+					
+					String[] from = { KEY_TIMESTAMP, KEY_UUID, KEY_OPS, KEY_DATA };
+					int[] to = new int[] { R.id.timestampView, R.id.uuidView,
+							R.id.opsView, R.id.dataView };
+					logViewAdapter = new SimpleAdapter(
+							AAL_vAssist_BLE_Service_Logs_Activity_Template.this, logs,
+							R.layout.log_event, from, to);
+	
+					logView.setAdapter(logViewAdapter);
+	
+					Intent intent = new Intent(
+							AAL_vAssist_BLE_Service_Logs_Activity_Template.this,
+							AAl_vAssist_BLE_Service_Template.class);
+					intent.putExtra("BinderType", "Logs");
+	
+					bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+			}
+		};
+		mThreadPoolExecutor.execute(runnable);
 		
-		Intent intent  = new Intent(AAL_vAssist_BLE_Service_Logs_Activity_Template.this,AAl_vAssist_BLE_Service_Template.class);
-		intent.putExtra("BinderType", "Logs");
-		//startService(new Intent(AAL_vAssist_BLE_Service_Logs_Activity_Template.this,org.aal.vassist.service.Samsung_BLE_Access_AndroidService.class));
-		//startService(intent);
-		
-		bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 	}
 
 	@Override
@@ -238,19 +190,104 @@ public class AAL_vAssist_BLE_Service_Logs_Activity_Template extends Activity {
 		unbindService(serviceConnection);
 		super.onDestroy();
 	}
+
+	private void updateLogView(final long timestamp, final int opsType,
+			final String uuid, final byte[] bytes) {
+		int i = 0;
+		int l = bytes.length;
+		int v = 0;
+		String ops;
+
+		Message msg = mHandler.obtainMessage(Message_What_Logs);
+		Bundle data = msg.getData();
+
+		switch (opsType) {
+		case AAl_vAssist_BLE_Service_Template.MSG_DEVICE_DISCONNECTED:
+			ops = "disconnected from device";
+			break;
+		case AAl_vAssist_BLE_Service_Template.MSG_DEVICE_CONNECTED:
+			ops = "connected to device";
+			break;
+		case AAl_vAssist_BLE_Service_Template.MSG_CHARACTERISTIC_CHANGED:
+			ops = "characteristic changed";
+			break;
+		case AAl_vAssist_BLE_Service_Template.MSG_CHARACTERISTIC_READ:
+			ops = "characteristic read";
+			break;
+		case AAl_vAssist_BLE_Service_Template.MSG_CHARACTERISTIC_READ_FAILED:
+			ops = "characteristic read failed";
+			break;
+		case AAl_vAssist_BLE_Service_Template.MSG_CHARACTERISTIC_WRITE:
+			ops = "characteristic write";
+			break;
+		case AAl_vAssist_BLE_Service_Template.MSG_CHARACTERISTIC_WRITE_FAILED:
+			ops = "characteristic write failed";
+			break;
+		case AAl_vAssist_BLE_Service_Template.MSG_DESCRIPTION_READ:
+			ops = "description read";
+			break;
+		case AAl_vAssist_BLE_Service_Template.MSG_DESCRIPTION_READ_FAILED:
+			ops = "description read failed";
+			break;
+		case AAl_vAssist_BLE_Service_Template.MSG_DESCRIPTION_WRITE:
+			ops = "description write";
+			break;
+		case AAl_vAssist_BLE_Service_Template.MSG_DESCRIPTION_WRITE_FAILED:
+			ops = "description write failed";
+			break;
+		case AAl_vAssist_BLE_Service_Template.MSG_SCANNING:
+			ops = "scanning";
+			break;
+		case AAl_vAssist_BLE_Service_Template.MSG_SCANNING_FAILED:
+			ops = "scanning failed";
+			break;
+		case AAl_vAssist_BLE_Service_Template.MSG_STOP_SCANNING:
+			ops = "scanning over";
+			break;
+		case AAl_vAssist_BLE_Service_Template.MSG_NO_DEVICE_FOUND:
+			ops = "no device found";
+			break;
+
+		default:
+			ops = "operation unknown";
+			break;
+		}
+
+		data.putString(KEY_TIMESTAMP, getPrintableHour(timestamp));
+		data.putString(KEY_OPS, ops);
+		data.putString(KEY_UUID, uuid);
+		StringBuilder sb = new StringBuilder(l * 3);
+		while (l-- > 0) {
+
+			v = 255 & bytes[i++];
+			if (v < 16) {
+				sb.append('0');
+			}
+			sb.append(Integer.toString(v, 16));
+			sb.append(' ');
+		}
+		data.putString(KEY_DATA, sb.toString());
+		msg.sendToTarget();
+	}
 	
+	
+	/**
+	 * you can replace by your time format
+	 * 
+	 * @param timestamp
+	 * @return
+	 */
 	private static String getPrintableHour(long timestamp){
-		String time = "";
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(timestamp);
-		time += cal.get(Calendar.HOUR_OF_DAY);
-		time += ":";
-		time += cal.get(Calendar.MINUTE);
-		time += ":";
-		time += cal.get(Calendar.SECOND);
-		time += ".";
-		time += cal.get(Calendar.MILLISECOND);
-		return time;
+		StringBuilder time = new StringBuilder(12);
+		ANCILIARY_CALENDAR.setTimeInMillis(timestamp);
+		time.append(ANCILIARY_CALENDAR.get(Calendar.HOUR_OF_DAY));
+		time.append(':');
+		time.append(ANCILIARY_CALENDAR.get(Calendar.MINUTE));
+		time.append(':');
+		time.append(ANCILIARY_CALENDAR.get(Calendar.SECOND));
+		time.append('.');
+		time.append(ANCILIARY_CALENDAR.get(Calendar.MILLISECOND));
+		return time.toString();
 	}
 
 }
